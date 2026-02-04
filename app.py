@@ -8,16 +8,25 @@ import time
 # --- SEO & META CONFIG ---
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
-# --- GOOGLE ANALYTICS (GÜVENLİ ENTEGRASYON) ---
-st.markdown(f"""
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH8EXJY2DZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-      gtag('config', 'G-DH8EXJY2DZ');
-    </script>
-    """, unsafe_allow_html=True)
+# --- GOOGLE ANALYTICS (STREAMLIT UYUMLU KESİN ÇÖZÜM) ---
+# Bu yöntem kodu doğrudan head kısmına enjekte ederek veri akışını başlatır.
+st.markdown(
+    f"""
+    <iframe src="javascript:void(0)" style="display:none" onload="
+        (function(){{
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH8EXJY2DZ';
+            document.head.appendChild(s);
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){{dataLayer.push(arguments);}}
+            gtag('js', new Date());
+            gtag('config', 'G-DH8EXJY2DZ');
+        }})()
+    "></iframe>
+    """,
+    unsafe_allow_html=True
+)
 
 # --- MASTER CSS (LOCKED) ---
 st.markdown("""
@@ -69,69 +78,3 @@ st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
 # --- MAIN ENGINE ---
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
-
-with col_main:
-    st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Elite Precision Data Conversion</p>", unsafe_allow_html=True)
-    
-    uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
-
-    if uploaded_file:
-        with open("temp.pdf", "wb") as f: f.write(uploaded_file.getbuffer())
-        try:
-            with st.status("VELO PRO ENGINE PROCESSING...", expanded=True):
-                time.sleep(1)
-                tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice', line_scale=40)
-            
-            if len(tables) > 0:
-                st.info(f"Success: {len(tables)} enterprise tables identified.")
-                final_dfs = []
-                for i, table in enumerate(tables):
-                    df = table.df.copy()
-                    header_row_1 = df.iloc[0].astype(str)
-                    header_row_2 = df.iloc[1].astype(str)
-                    new_headers = []
-                    for h1, h2 in zip(header_row_1, header_row_2):
-                        h1_clean = h1.replace('Results', '').strip()
-                        full_h = f"Results - {h2}" if ("Accuracy" in h2 or "Time" in h2) else f"{h1_clean} {h2}".strip()
-                        new_headers.append(full_h)
-                    df.columns = new_headers
-                    df = df[2:].reset_index(drop=True)
-                    df = df.replace(r'^\s*$', pd.NA, regex=True).dropna(how='all')
-                    
-                    st.markdown(f"**Table {i+1}**")
-                    st.dataframe(df, use_container_width=True)
-                    final_dfs.append(df)
-                
-                output = BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    for i, df in enumerate(final_dfs):
-                        df.to_excel(writer, index=False, sheet_name=f'Table_{i+1}')
-                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
-        except Exception as e:
-            st.error(f"Processing error: {e}")
-        finally:
-            if os.path.exists("temp.pdf"): os.remove("temp.pdf")
-
-    st.markdown("---")
-    st.subheader("How It Works")
-    c1, c2, c3 = st.columns(3)
-    with c1: st.markdown("**1. Upload**\nDrop your high-complexity PDF file into the secure VELO zone.")
-    with c2: st.markdown("**2. Extract**\nOur Elite Engine identifies nested table structures with 99.9% accuracy.")
-    with c3: st.markdown("**3. Download**\nGet your perfectly formatted Excel file instantly.")
-
-with col_ad_side:
-    st.markdown('<div style="height:600px; background:#111827; border:1px solid #1f2937; border-radius:8px; writing-mode:vertical-rl; padding:20px; margin-top:100px; color:#374151; display:flex; align-items:center; justify-content:center;">ADVERTISEMENT</div>', unsafe_allow_html=True)
-
-# --- LEGAL FOOTER ---
-st.markdown("""
-    <div class="footer-links">
-        <p>VELO GLOBAL • 500MB PRO CAPACITY • 2026</p>
-        <p>
-            <a href="#">Privacy Policy</a> | 
-            <a href="#">Terms of Service</a> | 
-            <a href="#">Contact Us</a>
-        </p>
-        <p style="font-size: 10px; margin-top: 10px;">All uploaded files are processed in-memory and deleted immediately after conversion.</p>
-    </div>
-    """, unsafe_allow_html=True)
