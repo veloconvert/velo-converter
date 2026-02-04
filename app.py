@@ -5,11 +5,10 @@ from io import BytesIO
 import os
 import time
 
-# --- PERFORMANCE & LIMIT CONFIG ---
-# 500MB Limit tanımlıyoruz (Streamlit Cloud sağlığı için ideal limit)
+# --- PERFORMANCE CONFIG ---
 st.set_page_config(page_title="VELO", layout="wide")
 
-# --- VELO NİHAİ CSS ---
+# --- VELO REFINED CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
@@ -25,38 +24,42 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
+        margin-bottom: 5px;
     }
 
+    /* THE NEON LINE */
     .neon-divider {
         height: 3px;
         background: #00d2ff;
         box-shadow: 0 0 20px #00d2ff;
-        margin-bottom: 50px;
+        margin-bottom: 60px;
     }
 
-    /* CENTERED BIG UPLOADER WITH CUSTOM TEXT */
-    .stFileUploader {
-        max-width: 900px;
-        margin: 50px auto !important;
+    /* CENTERED MASSIVE UPLOADER & OVERRIDE 200MB TEXT */
+    [data-testid="stFileUploader"] {
+        max-width: 1000px;
+        margin: 60px auto !important;
         border: 2px dashed #00d2ff !important;
-        background-color: rgba(22, 27, 34, 0.7) !important;
-        border-radius: 20px !important;
-        padding: 40px !important;
+        background-color: rgba(22, 27, 34, 0.8) !important;
+        border-radius: 24px !important;
+        padding: 50px !important;
     }
-    
-    /* Hiding the default 200MB limit label and adding our own vibe */
-    .stFileUploader section [data-testid="stFileUploadDropzone"] div:nth-child(2) {
-        visibility: hidden;
+
+    /* MAGIC: Hiding 'Limit 200MB' and showing '500MB PRO' */
+    [data-testid="stFileUploadDropzone"] div div small {
+        display: none !important;
     }
-    .stFileUploader section [data-testid="stFileUploadDropzone"]::after {
+    [data-testid="stFileUploadDropzone"]::after {
         content: "VELO PRO LIMIT: 500MB PER FILE";
         color: #00d2ff;
-        font-weight: 700;
-        font-size: 14px;
+        font-weight: 800;
+        font-size: 16px;
         display: block;
-        margin-top: -20px;
+        margin-top: 15px;
+        letter-spacing: 1px;
     }
 
+    /* AD SLOTS */
     .ad-slot {
         background: #111827;
         border: 1px solid #1f2937;
@@ -68,51 +71,52 @@ st.markdown("""
         font-size: 11px;
     }
 
+    /* DOWNLOAD BUTTON */
     .stDownloadButton>button {
         width: 100% !important;
-        max-width: 500px;
-        margin: 40px auto !important;
+        max-width: 600px;
+        margin: 50px auto !important;
         display: block;
         background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
-        padding: 20px !important;
-        font-size: 22px !important;
+        padding: 22px !important;
+        font-size: 24px !important;
         font-weight: 800 !important;
-        border-radius: 50px !important;
-        box-shadow: 0 15px 35px rgba(22, 101, 52, 0.4);
+        border-radius: 60px !important;
+        box-shadow: 0 15px 40px rgba(22, 101, 52, 0.4);
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- HEADER ---
-col_l, col_r = st.columns([4, 1])
-with col_l:
+col_logo, col_serv = st.columns([4, 1])
+with col_logo:
     st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
-with col_r:
-    st.markdown('<div style="text-align: right; margin-top: 20px;">', unsafe_allow_html=True)
+with col_serv:
+    st.markdown('<div style="text-align: right; margin-top: 30px;">', unsafe_allow_html=True)
     with st.popover("🌐 OUR SERVICES", use_container_width=True):
         st.write("✅ PDF Table Extractor")
         st.divider()
         st.write("• VELO Compressor")
-        st.write("• VELO Security Hub")
+        st.write("• VELO Image Lab")
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
-# --- CONTENT & ADS ---
-col_main, col_spacer, col_ad = st.columns([3.5, 0.5, 1])
+# --- CONTENT LAYOUT ---
+col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1]) # Reklamı daha da sağa ittik
 
 with col_main:
-    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:40px;">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:50px;">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
     
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 20px;'>Enterprise-grade extraction. No small limits.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #8b949e; font-size: 22px; text-align: center;'>High-Speed Enterprise Conversion</p>", unsafe_allow_html=True)
     
-    # 500MB Limit uploader
+    # Uploader
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
         if uploaded_file.size > 500 * 1024 * 1024:
-            st.error("File too large. Maximum size is 500MB.")
+            st.error("File exceeds 500MB PRO limit.")
         else:
             with open("temp.pdf", "wb") as f:
                 f.write(uploaded_file.getbuffer())
@@ -122,7 +126,7 @@ with col_main:
                     tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
                 
                 if len(tables) > 0:
-                    st.success(f"Success: {len(tables)} tables extracted.")
+                    st.success(f"Success: {len(tables)} tables identified.")
                     all_dfs = []
                     for table in tables:
                         st.dataframe(table.df, use_container_width=True)
@@ -141,7 +145,8 @@ with col_main:
             finally:
                 if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
-with col_ad:
-    st.markdown('<div class="ad-slot" style="height:600px; writing-mode:vertical-rl; padding:20px;">SIDE ADVERTISEMENT</div>', unsafe_allow_html=True)
+with col_ad_side:
+    st.markdown('<div class="ad-slot" style="height:600px; writing-mode:vertical-rl; padding:20px; margin-top:100px;">SIDE ADVERTISEMENT</div>', unsafe_allow_html=True)
 
-st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px;'>VELO GLOBAL • 500MB PRO LIMIT • 2026</div>", unsafe_allow_html=True)
+# --- FOOTER ---
+st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px; border-top: 1px solid #1f2937; padding-top: 20px;'>VELO GLOBAL • 500MB PRO CAPACITY • 2026</div>", unsafe_allow_html=True)
