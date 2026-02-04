@@ -5,114 +5,129 @@ from io import BytesIO
 import os
 import time
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="VELO | PDF to Excel Pro", layout="wide", page_icon="📊")
+# --- SAFE PAGE CONFIG (Safari Fix) ---
+st.set_page_config(page_title="VELO", layout="wide")
 
-# --- CUSTOM CSS (LUXURY & BRANDING) ---
+# --- MOBILE & DESKTOP OPTIMIZED CSS ---
 st.markdown("""
     <style>
+    /* Base Background */
     .stApp { background-color: #0e1117; color: #ffffff; }
+
+    /* Custom Header with dynamic font size */
+    .brand-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #1f2937;
+        margin-bottom: 25px;
+    }
     
-    /* VELO BRAND SIGNATURE (Top Left) */
-    .brand-signature {
-        position: absolute;
-        top: -60px;
-        left: 0;
+    .brand-name {
         font-family: 'Inter', sans-serif;
         font-weight: 800;
-        font-size: 24px;
-        letter-spacing: 4px;
+        font-size: clamp(20px, 6vw, 30px);
+        letter-spacing: 5px;
         color: #ffffff;
-        opacity: 0.9;
-        text-transform: uppercase;
     }
 
-    /* TABLE COUNTER STYLE */
-    .table-counter {
-        color: #484f58; /* Muted color */
-        font-style: italic;
-        font-size: 14px;
-        margin-top: -10px;
-        margin-bottom: 20px;
+    .network-tag {
+        color: #4b5563;
+        font-size: clamp(10px, 3vw, 13px);
+        text-align: right;
+        line-height: 1.2;
     }
 
-    /* LUXURY GREEN DOWNLOAD BUTTON */
+    /* NEON CONTAINER - Optimized for Mobile Padding */
+    .main-box {
+        border: 2px solid #00d2ff;
+        border-radius: 15px;
+        padding: clamp(15px, 4vw, 30px);
+        background: rgba(13, 17, 23, 0.9);
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+    }
+
+    /* Hidden Streamlit Header for cleaner look */
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+
+    /* Mobile Responsive Buttons */
     .stDownloadButton>button {
+        width: 100% !important;
+        max-width: 500px;
+        margin: 20px auto !important;
         display: block;
-        margin: 40px auto;
-        background: linear-gradient(145deg, #2ea44f, #22863a);
-        color: white !important;
-        border: 1px solid #ffffff33 !important;
-        padding: 15px 50px !important;
-        font-size: 20px !important;
-        font-weight: 700 !important;
+        background: linear-gradient(145deg, #22c55e, #166534);
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        padding: 15px !important;
+        font-size: 18px !important;
         border-radius: 50px !important;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        text-transform: uppercase;
-        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(22, 101, 52, 0.3);
     }
-    
-    /* Other CSS rules remain for top menu and layout... */
-    .other-sites-menu { display: flex; justify-content: flex-end; gap: 25px; padding: 15px 0; border-bottom: 1px solid #30363d; margin-bottom: 40px; }
-    .other-sites-menu a { color: #8b949e; text-decoration: none; font-size: 14px; }
+
+    /* Input Field Fix for Mobile */
+    .stFileUploader {
+        border: 1px dashed #30363d !important;
+        border-radius: 12px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- BRANDING & TOP NAV ---
-st.markdown('<div class="brand-signature">VELO</div>', unsafe_allow_html=True)
-
+# --- HEADER AREA ---
 st.markdown("""
-    <div class="other-sites-menu">
-        <a href="#">Compress</a> <a href="#">Merge</a> <a href="#">Edit</a> <a href="#">OCR</a>
+    <div class="brand-header">
+        <div class="brand-name">VELO</div>
+        <div class="network-tag">VELO NETWORK<br>PDF SERVICES</div>
     </div>
     """, unsafe_allow_html=True)
 
-# --- MAIN HEADER ---
-st.title("Professional PDF Table Extractor")
-st.markdown("<p style='color: #8b949e;'>Precision-engineered table extraction for global enterprises.</p>", unsafe_allow_html=True)
+# --- APP TITLE ---
+st.title("PDF Table Extractor")
+st.markdown("<p style='color: #9ca3af; margin-top: -15px;'>Professional Data Conversion</p>", unsafe_allow_html=True)
 
-# --- UPLOAD SECTION ---
-uploaded_file = st.file_uploader("Drop your PDF here", type="pdf")
+# --- MAIN ENGINE ---
+uploaded_file = st.file_uploader("Upload PDF", type="pdf")
 
 if uploaded_file:
     with open("temp.pdf", "wb") as f:
         f.write(uploaded_file.getbuffer())
     
     try:
-        with st.status("Analyzing...", expanded=True) as status:
-            time.sleep(1.5) # Orange energy simulation
+        with st.status("Processing...", expanded=True) as status:
+            time.sleep(1) # Visual feedback
             tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
-            status.update(label="Complete!", state="complete", expanded=False)
+            status.update(label="Analysis Ready!", state="complete", expanded=False)
         
         if len(tables) > 0:
-            st.markdown("### Data Preview")
-            # TABLE COUNTER (LUXURY MUTED ITALIC)
-            st.markdown(f'<div class="table-counter">({len(tables)} tables identified)</div>', unsafe_allow_html=True)
+            st.markdown(f"<p style='color: #4b5563; font-style: italic;'>({len(tables)} tables identified)</p>", unsafe_allow_html=True)
             
             all_dfs = []
             for i, table in enumerate(tables):
-                df = table.df.copy()
-                # (Existing Header Fix Logic Remains Here)
-                if df.shape[1] > 5 and df.iloc[0, 4] == "Results":
-                    df.iloc[0, 5] = "Results"
-                    if df.shape[0] > 1 and (df.iloc[1, 4] != "" or df.iloc[1, 5] != ""):
-                        df.iloc[0, 4] = f"Results - {df.iloc[1, 4]}"
-                        df.iloc[0, 5] = f"Results - {df.iloc[1, 5]}"
-                        df = df.drop(1).reset_index(drop=True)
-                
-                st.dataframe(df, use_container_width=True)
-                all_dfs.append(df)
+                # We use container width to ensure it doesn't break mobile view
+                st.dataframe(table.df, use_container_width=True)
+                all_dfs.append(table.df)
             
+            # Excel Prep
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 for i, df in enumerate(all_dfs):
                     df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
             
-            st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
+            # THE LUXE BUTTON
+            st.download_button(
+                label="✅ READY TO DOWNLOAD",
+                data=output.getvalue(),
+                file_name="velo_export.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
             
         else:
-            st.error("No tables found.")
+            st.error("No tables detected.")
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error("An error occurred. Check PDF structure.")
     finally:
         if os.path.exists("temp.pdf"): os.remove("temp.pdf")
+
+# --- FOOTER ---
+st.markdown("<div style='text-align: center; color: #1f2937; font-size: 10px; margin-top: 40px;'>SECURE • GLOBAL • VELO</div>", unsafe_allow_html=True)
