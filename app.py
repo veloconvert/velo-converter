@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import camelot
 import pandas as pd
 from io import BytesIO
@@ -9,15 +10,19 @@ import time
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
 # --- GOOGLE ANALYTICS (GÜVENLİ ENTEGRASYON) ---
-st.markdown("""
+# Senin koduna sadece bu bileşen eklendi, geri kalan her şey birebir aynıdır.
+components.html(
+    f"""
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH8EXJY2DZ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      function gtag(){{dataLayer.push(arguments);}}
       gtag('js', new Date());
       gtag('config', 'G-DH8EXJY2DZ');
     </script>
-    """, unsafe_allow_html=True)
+    """,
+    height=0,
+)
 
 # --- MASTER CSS (LOCKED) ---
 st.markdown("""
@@ -134,4 +139,4 @@ st.markdown("""
         </p>
         <p style="font-size: 10px; margin-top: 10px;">All uploaded files are processed in-memory and deleted immediately after conversion.</p>
     </div>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow
