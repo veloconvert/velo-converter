@@ -5,16 +5,17 @@ from io import BytesIO
 import os
 import time
 
-# --- SEO & META CONFIG ---
-st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
+# --- SEO & GOOGLE VERIFICATION ---
+st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide")
 
-# --- MASTER CSS (LOCKED & ENHANCED) ---
+# Google Search Console Verification Tag
+st.markdown('<meta name="google-site-verification" content="7QSo9l_GthJCi86IIW0CLwarA2KK0AtgZO-WN4PnlTE" />', unsafe_allow_html=True)
+
+# --- MASTER CSS (LOCKED) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
     .stApp { background-color: #0b0e14; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-    
-    /* LOGO & BRANDING */
     .brand-logo {
         font-weight: 800; font-size: clamp(45px, 10vw, 75px); letter-spacing: 15px;
         background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #ffffff 100%);
@@ -22,8 +23,6 @@ st.markdown("""
         filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
     }
     .neon-divider { height: 3px; background: #00d2ff; box-shadow: 0 0 20px #00d2ff; margin-bottom: 60px; }
-    
-    /* UPLOADER OVERRIDE */
     [data-testid="stFileUploader"] {
         max-width: 1000px; margin: 40px auto !important; border: 2px dashed #00d2ff !important;
         background-color: rgba(22, 27, 34, 0.8) !important; border-radius: 24px !important; padding: 50px !important;
@@ -36,13 +35,15 @@ st.markdown("""
         font-size: 18px !important; letter-spacing: 3px; text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
         background-color: #161b22; padding: 5px 20px; z-index: 99;
     }
-
-    /* FOOTER & INFO SECTIONS */
-    .info-card {
-        background: rgba(17, 24, 39, 0.5); border: 1px solid #1f2937;
-        padding: 20px; border-radius: 12px; margin-top: 20px;
+    .preview-header { font-size: 24px; font-weight: 700; color: #ffffff; margin-top: 40px; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }
+    .table-stat-info { color: #00d2ff; font-style: italic; font-size: 14px; margin-bottom: 20px; }
+    .stDownloadButton>button {
+        width: 100% !important; max-width: 600px; margin: 50px auto !important; display: block;
+        background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); padding: 22px !important;
+        font-size: 24px !important; font-weight: 800 !important; border-radius: 60px !important;
+        box-shadow: 0 15px 40px rgba(22, 101, 52, 0.4);
     }
-    .footer-links { text-align: center; font-size: 12px; color: #4b5563; margin-top: 50px; }
+    .footer-links { text-align: center; font-size: 12px; color: #4b5563; margin-top: 80px; }
     .footer-links a { color: #00d2ff; text-decoration: none; margin: 0 10px; }
     </style>
     """, unsafe_allow_html=True)
@@ -65,7 +66,6 @@ col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 with col_main:
     st.title("Professional PDF Table Extractor")
     st.markdown("<p style='color: #8b949e; font-size: 22px;'>Elite Precision Data Conversion</p>", unsafe_allow_html=True)
-    
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
@@ -76,11 +76,11 @@ with col_main:
                 tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice', line_scale=40)
             
             if len(tables) > 0:
-                st.info(f"Success: {len(tables)} enterprise tables identified.")
+                st.markdown('<div class="preview-header">Data Preview</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="table-stat-info">Success: {len(tables)} enterprise tables identified.</div>', unsafe_allow_html=True)
                 final_dfs = []
                 for i, table in enumerate(tables):
                     df = table.df.copy()
-                    # LOCKED MASTER ALGORITHM (Restored from previous turn)
                     header_row_1 = df.iloc[0].astype(str)
                     header_row_2 = df.iloc[1].astype(str)
                     new_headers = []
@@ -91,7 +91,6 @@ with col_main:
                     df.columns = new_headers
                     df = df[2:].reset_index(drop=True)
                     df = df.replace(r'^\s*$', pd.NA, regex=True).dropna(how='all')
-                    
                     st.markdown(f"**Table {i+1}**")
                     st.dataframe(df, use_container_width=True)
                     final_dfs.append(df)
@@ -105,26 +104,20 @@ with col_main:
         finally:
             if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
-    # --- HOW IT WORKS & FAQ (FOR SEO) ---
     st.markdown("---")
     st.subheader("How It Works")
     c1, c2, c3 = st.columns(3)
-    with c1: st.markdown("**1. Upload**\nDrop your high-complexity PDF file into the secure VELO zone.")
-    with c2: st.markdown("**2. Extract**\nOur Elite Engine identifies nested table structures with 99.9% accuracy.")
+    with c1: st.markdown("**1. Upload**\nDrop your PDF file into the secure VELO zone.")
+    with c2: st.markdown("**2. Extract**\nOur Engine identifies tables with 99.9% accuracy.")
     with c3: st.markdown("**3. Download**\nGet your perfectly formatted Excel file instantly.")
 
 with col_ad_side:
     st.markdown('<div style="height:600px; background:#111827; border:1px solid #1f2937; border-radius:8px; writing-mode:vertical-rl; padding:20px; margin-top:100px; color:#374151; display:flex; align-items:center; justify-content:center;">ADVERTISEMENT</div>', unsafe_allow_html=True)
 
-# --- LEGAL FOOTER (FOR ADSENSE) ---
+# --- LEGAL FOOTER ---
 st.markdown("""
     <div class="footer-links">
         <p>VELO GLOBAL • 500MB PRO CAPACITY • 2026</p>
-        <p>
-            <a href="#">Privacy Policy</a> | 
-            <a href="#">Terms of Service</a> | 
-            <a href="#">Contact Us</a>
-        </p>
-        <p style="font-size: 10px; margin-top: 10px;">All uploaded files are processed in-memory and deleted immediately after conversion.</p>
+        <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact Us</a></p>
     </div>
     """, unsafe_allow_html=True)
