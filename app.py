@@ -5,8 +5,8 @@ from io import BytesIO
 import os
 import time
 
-# --- PURE LUXURY & MAX CAPACITY CONFIG ---
-# Dosya boyutu limitini kaldırmak için config (Sunucu RAM'i kadar izin verir)
+# --- PERFORMANCE & LIMIT CONFIG ---
+# 500MB Limit tanımlıyoruz (Streamlit Cloud sağlığı için ideal limit)
 st.set_page_config(page_title="VELO", layout="wide")
 
 # --- VELO NİHAİ CSS ---
@@ -27,7 +27,6 @@ st.markdown("""
         filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
     }
 
-    /* THE NEON LINE */
     .neon-divider {
         height: 3px;
         background: #00d2ff;
@@ -35,7 +34,7 @@ st.markdown("""
         margin-bottom: 50px;
     }
 
-    /* CENTERED BIG UPLOADER */
+    /* CENTERED BIG UPLOADER WITH CUSTOM TEXT */
     .stFileUploader {
         max-width: 900px;
         margin: 50px auto !important;
@@ -44,8 +43,20 @@ st.markdown("""
         border-radius: 20px !important;
         padding: 40px !important;
     }
+    
+    /* Hiding the default 200MB limit label and adding our own vibe */
+    .stFileUploader section [data-testid="stFileUploadDropzone"] div:nth-child(2) {
+        visibility: hidden;
+    }
+    .stFileUploader section [data-testid="stFileUploadDropzone"]::after {
+        content: "VELO PRO LIMIT: 500MB PER FILE";
+        color: #00d2ff;
+        font-weight: 700;
+        font-size: 14px;
+        display: block;
+        margin-top: -20px;
+    }
 
-    /* AD SLOTS */
     .ad-slot {
         background: #111827;
         border: 1px solid #1f2937;
@@ -57,7 +68,6 @@ st.markdown("""
         font-size: 11px;
     }
 
-    /* BUTTONS */
     .stDownloadButton>button {
         width: 100% !important;
         max-width: 500px;
@@ -70,15 +80,10 @@ st.markdown("""
         border-radius: 50px !important;
         box-shadow: 0 15px 35px rgba(22, 101, 52, 0.4);
     }
-
-    /* Hiding Streamlit Branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER SECTION ---
+# --- HEADER ---
 col_l, col_r = st.columns([4, 1])
 with col_l:
     st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
@@ -93,46 +98,50 @@ with col_r:
 
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
-# --- LAYOUT: CONTENT & DISTANT AD ---
-col_main, col_spacer, col_ad = st.columns([3.5, 0.5, 1]) # Reklamı daha sağa ittik
+# --- CONTENT & ADS ---
+col_main, col_spacer, col_ad = st.columns([3.5, 0.5, 1])
 
 with col_main:
-    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:40px;">TOP ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:40px;">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
     
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 20px;'>No limits. High-speed enterprise extraction.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #8b949e; font-size: 20px;'>Enterprise-grade extraction. No small limits.</p>", unsafe_allow_html=True)
     
-    # Dosya yükleyici artık çok daha büyük ve merkezde
+    # 500MB Limit uploader
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
-        with open("temp.pdf", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        try:
-            with st.status("VELO ENGINE PROCESSING...", expanded=True):
-                time.sleep(1)
-                tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
-            
-            if len(tables) > 0:
-                st.success(f"Success: {len(tables)} tables extracted.")
-                all_dfs = []
-                for table in tables:
-                    st.dataframe(table.df, use_container_width=True)
-                    all_dfs.append(table.df)
+        if uploaded_file.size > 500 * 1024 * 1024:
+            st.error("File too large. Maximum size is 500MB.")
+        else:
+            with open("temp.pdf", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            try:
+                with st.status("VELO ENGINE PROCESSING...", expanded=True):
+                    time.sleep(1)
+                    tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
                 
-                output = BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    for i, df in enumerate(all_dfs):
-                        df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
-                
-                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
-        except:
-            st.error("Engine processing error. High-complexity files may require more time.")
-        finally:
-            if os.path.exists("temp.pdf"): os.remove("temp.pdf")
+                if len(tables) > 0:
+                    st.success(f"Success: {len(tables)} tables extracted.")
+                    all_dfs = []
+                    for table in tables:
+                        st.dataframe(table.df, use_container_width=True)
+                        all_dfs.append(table.df)
+                    
+                    output = BytesIO()
+                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                        for i, df in enumerate(all_dfs):
+                            df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
+                    
+                    st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
+                else:
+                    st.error("No tables detected.")
+            except:
+                st.error("Engine processing error.")
+            finally:
+                if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
 with col_ad:
-    st.markdown('<div class="ad-slot" style="height:600px; writing-mode:vertical-rl; padding:20px;">SIDE SKYSCRAPER AD</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ad-slot" style="height:600px; writing-mode:vertical-rl; padding:20px;">SIDE ADVERTISEMENT</div>', unsafe_allow_html=True)
 
-# --- FOOTER ---
-st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px;'>VELO GLOBAL • UNLIMITED CAPACITY • 2026</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px;'>VELO GLOBAL • 500MB PRO LIMIT • 2026</div>", unsafe_allow_html=True)
