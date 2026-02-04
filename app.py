@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import camelot
 import pandas as pd
 from io import BytesIO
@@ -8,16 +9,20 @@ import time
 # --- SEO & META CONFIG ---
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
-# --- GOOGLE ANALYTICS (GÜVENLİ ENTEGRASYON) ---
-st.markdown("""
+# --- GOOGLE ANALYTICS INTEGRATION (KESİN ÇÖZÜM) ---
+# Bu blok, Streamlit'in kısıtlamalarına takılmadan sinyali Google'a gönderir.
+components.html(
+    f"""
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH8EXJY2DZ"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-DH8EXJY2DZ');
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){{dataLayer.push(arguments);}}
+        gtag('js', new Date());
+        gtag('config', 'G-DH8EXJY2DZ');
     </script>
-    """, unsafe_allow_html=True)
+    """,
+    height=0,
+)
 
 # --- MASTER CSS (LOCKED) ---
 st.markdown("""
@@ -46,10 +51,6 @@ st.markdown("""
         background-color: #161b22; padding: 5px 20px; z-index: 99;
     }
 
-    .info-card {
-        background: rgba(17, 24, 39, 0.5); border: 1px solid #1f2937;
-        padding: 20px; border-radius: 12px; margin-top: 20px;
-    }
     .footer-links { text-align: center; font-size: 12px; color: #4b5563; margin-top: 50px; }
     .footer-links a { color: #00d2ff; text-decoration: none; margin: 0 10px; }
     </style>
@@ -107,31 +108,4 @@ with col_main:
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:
                     for i, df in enumerate(final_dfs):
                         df.to_excel(writer, index=False, sheet_name=f'Table_{i+1}')
-                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
-        except Exception as e:
-            st.error(f"Processing error: {e}")
-        finally:
-            if os.path.exists("temp.pdf"): os.remove("temp.pdf")
-
-    st.markdown("---")
-    st.subheader("How It Works")
-    c1, c2, c3 = st.columns(3)
-    with c1: st.markdown("**1. Upload**\nDrop your high-complexity PDF file into the secure VELO zone.")
-    with c2: st.markdown("**2. Extract**\nOur Elite Engine identifies nested table structures with 99.9% accuracy.")
-    with c3: st.markdown("**3. Download**\nGet your perfectly formatted Excel file instantly.")
-
-with col_ad_side:
-    st.markdown('<div style="height:600px; background:#111827; border:1px solid #1f2937; border-radius:8px; writing-mode:vertical-rl; padding:20px; margin-top:100px; color:#374151; display:flex; align-items:center; justify-content:center;">ADVERTISEMENT</div>', unsafe_allow_html=True)
-
-# --- LEGAL FOOTER ---
-st.markdown("""
-    <div class="footer-links">
-        <p>VELO GLOBAL • 500MB PRO CAPACITY • 2026</p>
-        <p>
-            <a href="#">Privacy Policy</a> | 
-            <a href="#">Terms of Service</a> | 
-            <a href="#">Contact Us</a>
-        </p>
-        <p style="font-size: 10px; margin-top: 10px;">All uploaded files are processed in-memory and deleted immediately after conversion.</p>
-    </div>
-    """, unsafe_allow_html=True)
+                st.download_button(label="✅ READY
