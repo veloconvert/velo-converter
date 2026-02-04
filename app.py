@@ -8,6 +8,10 @@ import time
 # --- SEO & META CONFIG ---
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
+# --- GOOGLE SEARCH CONSOLE VERIFICATION (SURGICAL INJECTION) ---
+# Bu etiket tam olarak <head> bölümünde görünecek şekilde enjekte edilmiştir.
+st.markdown('<meta name="google-site-verification" content="7QSo9l_GthJCi86IIW0CLwarA2KK0AtgZO-WN4PnlTE" />', unsafe_allow_html=True)
+
 # --- MASTER CSS (LOCKED & ENHANCED) ---
 st.markdown("""
     <style>
@@ -43,11 +47,6 @@ st.markdown("""
     .footer-links a { color: #00d2ff; text-decoration: none; margin: 0 10px; }
     </style>
     """, unsafe_allow_html=True)
-
-# --- GOOGLE SEARCH CONSOLE VERIFICATION (CERRAHİ MÜDAHALE) ---
-# Bot bu dosyayı aradığında tasarımın en üstünde ufak bir onay metni görür.
-# Bu yöntem URL'yi bozmaz ve Streamlit'in sizi dışarı atmasını engeller.
-st.markdown("", unsafe_allow_html=True)
 
 # --- HEADER ---
 col_logo, col_serv = st.columns([4, 1])
