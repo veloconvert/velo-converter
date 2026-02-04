@@ -45,13 +45,12 @@ st.markdown("""
         position: relative;
     }
 
-    /* THE GHOST MASK: Bu kısım 200MB yazısını fiziksel olarak kapatır */
+    /* 200MB MASKING */
     [data-testid="stFileUploadDropzone"] div div small {
         opacity: 0 !important;
         display: none !important;
     }
     
-    /* Yeni ve güçlü 500MB PRO yazısı */
     [data-testid="stFileUploadDropzone"]::after {
         content: "VELO PRO | 500MB CAPACITY";
         position: absolute;
@@ -63,21 +62,26 @@ st.markdown("""
         font-size: 18px !important;
         letter-spacing: 3px;
         text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
-        background-color: #161b22; /* Yazının arkasını kapatmak için */
+        background-color: #161b22;
         padding: 5px 20px;
         z-index: 99;
     }
 
-    /* AD SLOTS */
-    .ad-slot {
-        background: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 8px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: #374151;
-        font-size: 11px;
+    /* PREVIEW HEADERS */
+    .preview-header {
+        font-size: 24px;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 40px 0 10px 0;
+        border-bottom: 1px solid #1f2937;
+        padding-bottom: 10px;
+    }
+
+    .table-stat-info {
+        color: #00d2ff;
+        font-style: italic;
+        font-size: 14px;
+        margin-bottom: 20px;
     }
 
     /* BUTTONS */
@@ -93,11 +97,6 @@ st.markdown("""
         border-radius: 60px !important;
         box-shadow: 0 15px 40px rgba(22, 101, 52, 0.4);
     }
-    
-    @media (max-width: 768px) {
-        .brand-logo { font-size: 35px; letter-spacing: 8px; }
-        [data-testid="stFileUploadDropzone"]::after { font-size: 14px; bottom: 10px; }
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -111,7 +110,6 @@ with col_serv:
         st.write("✅ PDF to Excel Pro")
         st.divider()
         st.write("• VELO Compressor")
-        st.write("• VELO Security Lab")
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
@@ -120,45 +118,46 @@ st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
-    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:50px;">TOP ADVERTISEMENT</div>', unsafe_allow_html=True)
-    
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Enterprise-Grade Data Hub</p>", unsafe_allow_html=True)
+    # YENİ SLOGAN
+    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Elite Precision Data Conversion</p>", unsafe_allow_html=True)
     
-    # 500MB Limit tanımlı uploader
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
-        if uploaded_file.size > 500 * 1024 * 1024:
-            st.error("File exceeds 500MB VELO PRO limit.")
-        else:
-            with open("temp.pdf", "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            try:
-                with st.status("VELO ENGINE PROCESSING...", expanded=True):
-                    time.sleep(1)
-                    tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
+        with open("temp.pdf", "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        try:
+            with st.status("VELO ENGINE PROCESSING...", expanded=True):
+                time.sleep(1)
+                # Hassas okuma modu (line_scale artırıldı)
+                tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice', line_scale=40)
+            
+            if len(tables) > 0:
+                # EKSİK OLAN BAŞLIKLAR GERİ GELDİ
+                st.markdown('<div class="preview-header">Data Preview</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="table-stat-info">Success: {len(tables)} tables identified and parsed.</div>', unsafe_allow_html=True)
                 
-                if len(tables) > 0:
-                    st.success(f"Extracted {len(tables)} tables.")
-                    for table in tables:
-                        st.dataframe(table.df, use_container_width=True)
-                    
-                    output = BytesIO()
-                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                        for i, table in enumerate(tables):
-                            table.df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
-                    
-                    st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
-                else:
-                    st.error("No tables found.")
-            except:
-                st.error("Processing error.")
-            finally:
-                if os.path.exists("temp.pdf"): os.remove("temp.pdf")
+                all_dfs = []
+                for i, table in enumerate(tables):
+                    st.markdown(f"**Table {i+1}**")
+                    st.dataframe(table.df, use_container_width=True)
+                    all_dfs.append(table.df)
+                
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    for i, df in enumerate(all_dfs):
+                        df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
+                
+                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
+            else:
+                st.error("No tables found.")
+        except:
+            st.error("Processing error.")
+        finally:
+            if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
 with col_ad_side:
-    st.markdown('<div class="ad-slot" style="height:600px; writing-mode:vertical-rl; padding:20px; margin-top:100px;">SIDE ADVERTISEMENT</div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:600px; background:#111827; border:1px solid #1f2937; border-radius:8px; writing-mode:vertical-rl; padding:20px; margin-top:100px; color:#374151; display:flex; align-items:center; justify-content:center;">ADVERTISEMENT</div>', unsafe_allow_html=True)
 
-# --- FOOTER ---
 st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px;'>VELO GLOBAL • 500MB PRO CAPACITY • 2026</div>", unsafe_allow_html=True)
