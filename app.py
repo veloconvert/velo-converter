@@ -8,7 +8,7 @@ import time
 # --- PERFORMANCE CONFIG ---
 st.set_page_config(page_title="VELO", layout="wide")
 
-# --- VELO REFINED MASTER CSS (DEEP OVERRIDE) ---
+# --- VELO NİHAİ CSS (THE PHANTOM MASK) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
@@ -27,7 +27,6 @@ st.markdown("""
         margin-bottom: 5px;
     }
 
-    /* THE NEON LINE */
     .neon-divider {
         height: 3px;
         background: #00d2ff;
@@ -35,7 +34,7 @@ st.markdown("""
         margin-bottom: 60px;
     }
 
-    /* CENTERED MASSIVE UPLOADER */
+    /* CENTERED MASSIVE UPLOADER AREA */
     [data-testid="stFileUploader"] {
         max-width: 1000px;
         margin: 60px auto !important;
@@ -43,29 +42,30 @@ st.markdown("""
         background-color: rgba(22, 27, 34, 0.8) !important;
         border-radius: 24px !important;
         padding: 50px !important;
+        position: relative;
     }
 
-    /* --- THE 200MB KILLER --- */
-    /* Bu blok varsayılan limit yazısını her yerden siler */
-    [data-testid="stFileUploadDropzone"] div div small,
-    [data-testid="stFileUploader"] section small,
-    [data-testid="stFileUploader"] div[role="button"] + div {
-        display: none !important;
-        visibility: hidden !important;
+    /* THE GHOST MASK: Bu kısım 200MB yazısını fiziksel olarak kapatır */
+    [data-testid="stFileUploadDropzone"] div div small {
         opacity: 0 !important;
-        position: absolute !important;
+        display: none !important;
     }
     
-    /* Bizim lüks 500MB PRO etiketimiz */
+    /* Yeni ve güçlü 500MB PRO yazısı */
     [data-testid="stFileUploadDropzone"]::after {
-        content: "VELO PRO LIMIT: 500MB";
-        color: #00d2ff;
-        font-weight: 800;
-        font-size: 18px;
-        display: block;
-        margin-top: 15px;
+        content: "VELO PRO | 500MB CAPACITY";
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #00d2ff !important;
+        font-weight: 800 !important;
+        font-size: 18px !important;
         letter-spacing: 3px;
-        text-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
+        text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
+        background-color: #161b22; /* Yazının arkasını kapatmak için */
+        padding: 5px 20px;
+        z-index: 99;
     }
 
     /* AD SLOTS */
@@ -80,7 +80,7 @@ st.markdown("""
         font-size: 11px;
     }
 
-    /* DOWNLOAD BUTTON */
+    /* BUTTONS */
     .stDownloadButton>button {
         width: 100% !important;
         max-width: 600px;
@@ -96,6 +96,7 @@ st.markdown("""
     
     @media (max-width: 768px) {
         .brand-logo { font-size: 35px; letter-spacing: 8px; }
+        [data-testid="stFileUploadDropzone"]::after { font-size: 14px; bottom: 10px; }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -107,7 +108,6 @@ with col_logo:
 with col_serv:
     st.markdown('<div style="text-align: right; margin-top: 35px;">', unsafe_allow_html=True)
     with st.popover("🌐 OUR SERVICES", use_container_width=True):
-        st.markdown("**Enterprise Network**")
         st.write("✅ PDF to Excel Pro")
         st.divider()
         st.write("• VELO Compressor")
@@ -120,11 +120,12 @@ st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
-    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:50px;">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:50px;">TOP ADVERTISEMENT</div>', unsafe_allow_html=True)
     
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Global Data Conversion Hub</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Enterprise-Grade Data Hub</p>", unsafe_allow_html=True)
     
+    # 500MB Limit tanımlı uploader
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
@@ -139,7 +140,7 @@ with col_main:
                     tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
                 
                 if len(tables) > 0:
-                    st.success(f"Success: {len(tables)} tables identified.")
+                    st.success(f"Extracted {len(tables)} tables.")
                     for table in tables:
                         st.dataframe(table.df, use_container_width=True)
                     
@@ -150,9 +151,9 @@ with col_main:
                     
                     st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
                 else:
-                    st.error("No tables detected.")
+                    st.error("No tables found.")
             except:
-                st.error("Engine error.")
+                st.error("Processing error.")
             finally:
                 if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
