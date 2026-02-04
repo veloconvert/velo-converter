@@ -8,6 +8,12 @@ import time
 # --- SEO & META CONFIG ---
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
+# --- GOOGLE SEARCH CONSOLE VERIFICATION (CERRAHİ MÜDAHALE) ---
+# Google botu bu dosyayı aradığında ona içeriği gösterir.
+if "google9c4d4f78157d216e.html" in st.query_params:
+    st.write("google-site-verification: google9c4d4f78157d216e.html")
+    st.stop()
+
 # --- MASTER CSS (LOCKED & ENHANCED) ---
 st.markdown("""
     <style>
@@ -80,7 +86,6 @@ with col_main:
                 final_dfs = []
                 for i, table in enumerate(tables):
                     df = table.df.copy()
-                    # LOCKED MASTER ALGORITHM (Restored from previous turn)
                     header_row_1 = df.iloc[0].astype(str)
                     header_row_2 = df.iloc[1].astype(str)
                     new_headers = []
@@ -128,5 +133,3 @@ st.markdown("""
         <p style="font-size: 10px; margin-top: 10px;">All uploaded files are processed in-memory and deleted immediately after conversion.</p>
     </div>
     """, unsafe_allow_html=True)
-
-
