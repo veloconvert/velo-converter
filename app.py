@@ -8,7 +8,7 @@ import time
 # --- PURE LUXURY & MOBILE-FIX CONFIG ---
 st.set_page_config(page_title="VELO", layout="wide")
 
-# --- VELO REFINED CSS ---
+# --- VELO REFINED MASTER CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
@@ -30,19 +30,20 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: 10px;
+        padding: 10px 0;
         border-bottom: 1px solid rgba(255,255,255,0.05);
         margin-bottom: 40px;
     }
     
     .brand-logo {
         font-weight: 800;
-        font-size: 28px;
-        letter-spacing: 5px;
+        font-size: 32px;
+        letter-spacing: 6px;
         color: #ffffff;
+        text-shadow: 0 0 10px rgba(255,255,255,0.3);
     }
 
-    /* AD SLOTS - DISCREET */
+    /* AD SLOTS */
     .ad-top {
         width: 100%;
         height: 90px;
@@ -57,14 +58,6 @@ st.markdown("""
         border-radius: 4px;
     }
 
-    /* PREVIEW & STATS */
-    .stat-tag {
-        color: #4b5563;
-        font-style: italic;
-        font-size: 13px;
-        margin-top: 10px;
-    }
-
     /* BUTTONS */
     .stDownloadButton>button {
         width: 100% !important;
@@ -77,40 +70,43 @@ st.markdown("""
         border-radius: 8px !important;
         text-transform: uppercase;
         letter-spacing: 1px;
+        box-shadow: 0 10px 20px rgba(22, 101, 52, 0.3);
     }
 
     /* MOBILE ADJUSTMENTS */
     @media (max-width: 768px) {
-        .brand-logo { font-size: 20px; }
-        .nav-bar { padding: 10px 0; }
+        .brand-logo { font-size: 24px; letter-spacing: 3px; }
+        .nav-bar { padding: 5px 0; }
+        .ad-side { display: none; }
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- HEADER SECTION ---
-col_logo, col_menu = st.columns([1, 1])
+st.markdown('<div class="nav-bar">', unsafe_allow_html=True)
+col_logo, col_menu = st.columns([2, 1])
+
 with col_logo:
     st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
 
 with col_menu:
-    # Zarif dropdown menü butonu
-    with st.popover("🌐 VELO NETWORK", use_container_width=True):
-        st.markdown("**Active Services**")
-        st.write("✅ PDF to Excel (This App)")
+    with st.popover("🌐 NETWORK", use_container_width=True):
+        st.markdown("**Our Global Services**")
+        st.write("✅ PDF to Excel")
         st.divider()
-        st.markdown("**Coming Soon**")
-        st.write("• VELO Compressor")
-        st.write("• VELO Image AI")
+        st.write("• VELO Compressor (Soon)")
+        st.write("• VELO Image Tools (Soon)")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --- AD SLOT TOP ---
-st.markdown('<div class="ad-top">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
+st.markdown('<div class="ad-top">ADVERTISEMENT SPACE</div>', unsafe_allow_html=True)
 
 # --- MAIN ENGINE ---
 col_main, col_spacer, col_ad_side = st.columns([3, 0.2, 1])
 
 with col_main:
-    st.title("PDF Table Extractor")
-    st.markdown("<p style='color: #6b7280; margin-top:-15px;'>Professional High-Precision Conversion</p>", unsafe_allow_html=True)
+    st.title("Professional PDF Table Extractor")
+    st.markdown("<p style='color: #6b7280; margin-top:-15px;'>Enterprise Grade Data Conversion</p>", unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
@@ -122,11 +118,35 @@ with col_main:
             with st.status("Velo Engine Analyzing...", expanded=False) as status:
                 time.sleep(1)
                 tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
-                status.update(label="Ready", state="complete")
+                status.update(label="Analysis Ready", state="complete")
             
             if len(tables) > 0:
-                st.markdown(f'<div class="stat-tag">({len(tables)} tables identified)</div>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color:#4b5563; font-style:italic;">({len(tables)} tables identified)</p>', unsafe_allow_html=True)
                 
                 all_dfs = []
                 for table in tables:
-                    st.dataframe(table.df, use_container_
+                    st.dataframe(table.df, use_container_width=True)
+                    all_dfs.append(table.df)
+                
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    for i, df in enumerate(all_dfs):
+                        df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
+                
+                st.download_button(
+                    label="✅ READY TO DOWNLOAD",
+                    data=output.getvalue(),
+                    file_name="velo_export.xlsx"
+                )
+            else:
+                st.error("No tables detected.")
+        except Exception as e:
+            st.error("Processing error. Ensure PDF has valid tables.")
+        finally:
+            if os.path.exists("temp.pdf"): os.remove("temp.pdf")
+
+with col_ad_side:
+    st.markdown('<div class="ad-side" style="height:600px; background:#10141b; border:1px solid #1f2937; color:#374151; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:10px; writing-mode: vertical-rl;">ADVERTISEMENT SPACE</div>', unsafe_allow_html=True)
+
+# --- FOOTER ---
+st.markdown("<div style='text-align: center; color: #1f2937; font-size: 10px; margin-top: 50px;'>SECURE • PRIVATE • VELO GLOBAL 2026</div>", unsafe_allow_html=True)
