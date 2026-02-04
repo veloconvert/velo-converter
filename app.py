@@ -5,15 +5,13 @@ from io import BytesIO
 import os
 import time
 
-# --- PAGE CONFIG ---
+# --- UI SETTINGS (PERMANENTLY LOCKED) ---
 st.set_page_config(page_title="VELO", layout="wide")
 
-# --- UI STYLING (LOCKED) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
     .stApp { background-color: #0b0e14; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-    
     .brand-logo {
         font-weight: 800; font-size: clamp(45px, 10vw, 75px); letter-spacing: 15px;
         background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #ffffff 100%);
@@ -21,7 +19,6 @@ st.markdown("""
         filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
     }
     .neon-divider { height: 3px; background: #00d2ff; box-shadow: 0 0 20px #00d2ff; margin-bottom: 60px; }
-    
     [data-testid="stFileUploader"] {
         max-width: 1000px; margin: 60px auto !important; border: 2px dashed #00d2ff !important;
         background-color: rgba(22, 27, 34, 0.8) !important; border-radius: 24px !important; padding: 50px !important;
@@ -53,10 +50,9 @@ with col_serv:
         st.divider()
         st.write("• VELO Compressor")
     st.markdown('</div>', unsafe_allow_html=True)
-
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
-# --- MAIN LOGIC ---
+# --- LOGIC ---
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
@@ -67,25 +63,32 @@ with col_main:
     if uploaded_file:
         with open("temp.pdf", "wb") as f: f.write(uploaded_file.getbuffer())
         try:
-            with st.status("VELO ENGINE PROCESSING...", expanded=True):
+            with st.status("VELO LEGACY ENGINE PROCESSING...", expanded=True):
                 time.sleep(1)
-                # Streamline extraction
                 tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice', line_scale=40)
             
             if len(tables) > 0:
                 st.markdown('<div class="preview-header">Data Preview</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="table-stat-info">Success: {len(tables)} tables identified and parsed.</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="table-stat-info">Success: {len(tables)} tables identified.</div>', unsafe_allow_html=True)
                 
                 all_cleaned_dfs = []
                 for i, table in enumerate(tables):
                     df = table.df.copy()
                     
-                    # --- CLEANING LOGIC (RESTORED) ---
-                    # 1. İlk boş satırları temizle
-                    df = df.replace(r'^\s*$', pd.NA, regex=True).dropna(how='all')
-                    # 2. Üst başlıkların altındaki boşlukları kaydırarak Results gibi başlıkları temizle
-                    df.columns = df.iloc[0] # İlk satırı başlık yap
-                    df = df[1:].reset_index(drop=True) # Veriyi kaydır
+                    # --- THE LEGACY CLEANING ALGORITHM ---
+                    # 1. Tamamen boş satırları ve sütunları uçur
+                    df = df.replace(r'^\s*$', pd.NA, regex=True).dropna(how='all').dropna(axis=1, how='all')
+                    
+                    # 2. Results karmaşasını çözmek için ilk satırı kontrol et ve temizle
+                    if not df.empty:
+                        # İlk satırı başlık yap
+                        new_header = df.iloc[0] 
+                        df = df[1:] 
+                        df.columns = new_header
+                        
+                        # 3. Tekrar index sıfırla ve varsa NaN başlıkları temizle
+                        df = df.reset_index(drop=True)
+                        df.columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
                     
                     st.markdown(f"**Table {i+1}**")
                     st.dataframe(df, use_container_width=True)
@@ -97,8 +100,8 @@ with col_main:
                         df.to_excel(writer, index=False, sheet_name=f'Table_{i+1}')
                 
                 st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
-            else: st.error("No tables found.")
-        except: st.error("Processing error.")
+            else: st.error("No tables detected.")
+        except Exception as e: st.error(f"Error: {e}")
         finally:
             if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
