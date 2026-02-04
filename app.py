@@ -8,7 +8,7 @@ import time
 # --- PERFORMANCE CONFIG ---
 st.set_page_config(page_title="VELO", layout="wide")
 
-# --- VELO NİHAİ CSS (OVERRIDE MODE) ---
+# --- VELO REFINED MASTER CSS (DEEP OVERRIDE) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
@@ -45,25 +45,30 @@ st.markdown("""
         padding: 50px !important;
     }
 
-    /* AGGRESSIVE TEXT OVERRIDE: Hiding the default limit text completely */
-    [data-testid="stFileUploadDropzone"] div div small {
+    /* --- THE 200MB KILLER --- */
+    /* Bu blok varsayılan limit yazısını her yerden siler */
+    [data-testid="stFileUploadDropzone"] div div small,
+    [data-testid="stFileUploader"] section small,
+    [data-testid="stFileUploader"] div[role="button"] + div {
         display: none !important;
         visibility: hidden !important;
-        height: 0px !important;
+        opacity: 0 !important;
+        position: absolute !important;
     }
     
-    /* Adding the new high-end limit label */
+    /* Bizim lüks 500MB PRO etiketimiz */
     [data-testid="stFileUploadDropzone"]::after {
-        content: "VELO PRO LIMIT: 500MB PER FILE";
+        content: "VELO PRO LIMIT: 500MB";
         color: #00d2ff;
         font-weight: 800;
-        font-size: 16px;
+        font-size: 18px;
         display: block;
         margin-top: 15px;
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        letter-spacing: 3px;
+        text-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
     }
 
+    /* AD SLOTS */
     .ad-slot {
         background: #111827;
         border: 1px solid #1f2937;
@@ -75,7 +80,7 @@ st.markdown("""
         font-size: 11px;
     }
 
-    /* MOBILE & BUTTON FIXES */
+    /* DOWNLOAD BUTTON */
     .stDownloadButton>button {
         width: 100% !important;
         max-width: 600px;
@@ -91,36 +96,35 @@ st.markdown("""
     
     @media (max-width: 768px) {
         .brand-logo { font-size: 35px; letter-spacing: 8px; }
-        .ad-side { display: none; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER AREA ---
+# --- HEADER ---
 col_logo, col_serv = st.columns([4, 1])
 with col_logo:
     st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
 with col_serv:
     st.markdown('<div style="text-align: right; margin-top: 35px;">', unsafe_allow_html=True)
     with st.popover("🌐 OUR SERVICES", use_container_width=True):
-        st.write("✅ PDF Table Extractor")
+        st.markdown("**Enterprise Network**")
+        st.write("✅ PDF to Excel Pro")
         st.divider()
         st.write("• VELO Compressor")
-        st.write("• VELO Image Lab")
+        st.write("• VELO Security Lab")
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
-# --- MAIN LAYOUT ---
+# --- LAYOUT ---
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
     st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:50px;">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
     
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 22px;'>High-Speed Enterprise Conversion</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Global Data Conversion Hub</p>", unsafe_allow_html=True)
     
-    # Uploader Section
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
@@ -135,7 +139,7 @@ with col_main:
                     tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
                 
                 if len(tables) > 0:
-                    st.success(f"Extracted {len(tables)} tables.")
+                    st.success(f"Success: {len(tables)} tables identified.")
                     for table in tables:
                         st.dataframe(table.df, use_container_width=True)
                     
@@ -148,7 +152,7 @@ with col_main:
                 else:
                     st.error("No tables detected.")
             except:
-                st.error("Processing error.")
+                st.error("Engine error.")
             finally:
                 if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
