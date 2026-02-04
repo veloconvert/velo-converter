@@ -5,7 +5,7 @@ from io import BytesIO
 import os
 import time
 
-# --- UI SETTINGS (PERMANENTLY LOCKED) ---
+# --- UI SETTINGS (LOCKED & SECURED) ---
 st.set_page_config(page_title="VELO", layout="wide")
 
 st.markdown("""
@@ -52,7 +52,7 @@ with col_serv:
     st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
-# --- LOGIC ---
+# --- ENGINE ---
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
@@ -63,45 +63,53 @@ with col_main:
     if uploaded_file:
         with open("temp.pdf", "wb") as f: f.write(uploaded_file.getbuffer())
         try:
-            with st.status("VELO LEGACY ENGINE PROCESSING...", expanded=True):
+            with st.status("VELO PRO ENGINE PROCESSING...", expanded=True):
                 time.sleep(1)
+                # Tabloyu okurken Results birleşmesini yakalamak için flavor=lattice korundu
                 tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice', line_scale=40)
             
             if len(tables) > 0:
                 st.markdown('<div class="preview-header">Data Preview</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="table-stat-info">Success: {len(tables)} tables identified.</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="table-stat-info">Success: {len(tables)} enterprise tables identified.</div>', unsafe_allow_html=True)
                 
-                all_cleaned_dfs = []
+                final_dfs = []
                 for i, table in enumerate(tables):
                     df = table.df.copy()
                     
-                    # --- THE LEGACY CLEANING ALGORITHM ---
-                    # 1. Tamamen boş satırları ve sütunları uçur
-                    df = df.replace(r'^\s*$', pd.NA, regex=True).dropna(how='all').dropna(axis=1, how='all')
+                    # --- THE PERFECTIONIST ALGORITHM ---
+                    # 1. İlk iki satır genelde başlık karmaşasıdır (Results vs.)
+                    # Onları birleştirip tek bir temiz başlık yapıyoruz
+                    header_row_1 = df.iloc[0].astype(str)
+                    header_row_2 = df.iloc[1].astype(str)
                     
-                    # 2. Results karmaşasını çözmek için ilk satırı kontrol et ve temizle
-                    if not df.empty:
-                        # İlk satırı başlık yap
-                        new_header = df.iloc[0] 
-                        df = df[1:] 
-                        df.columns = new_header
-                        
-                        # 3. Tekrar index sıfırla ve varsa NaN başlıkları temizle
-                        df = df.reset_index(drop=True)
-                        df.columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
+                    new_headers = []
+                    for h1, h2 in zip(header_row_1, header_row_2):
+                        h1 = h1.replace('Results', '').strip() # Results kelimesini alt başlıklara paylaştıracağız
+                        full_h = f"{h1} {h2}".strip()
+                        # Eğer üstte Results varsa ve altta Accuracy varsa -> Results Accuracy olur
+                        if "Accuracy" in h2 or "Time" in h2:
+                            full_h = f"Results - {h2}".strip()
+                        new_headers.append(full_h)
+                    
+                    df.columns = new_headers
+                    # İlk iki satırı (artık başlık oldular) veriden temizle
+                    df = df[2:].reset_index(drop=True)
+                    
+                    # Boş satırları ve hayalet kolonları sil
+                    df = df.replace(r'^\s*$', pd.NA, regex=True).dropna(how='all')
                     
                     st.markdown(f"**Table {i+1}**")
                     st.dataframe(df, use_container_width=True)
-                    all_cleaned_dfs.append(df)
+                    final_dfs.append(df)
                 
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    for i, df in enumerate(all_cleaned_dfs):
+                    for i, df in enumerate(final_dfs):
                         df.to_excel(writer, index=False, sheet_name=f'Table_{i+1}')
                 
-                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
+                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_final_export.xlsx")
             else: st.error("No tables detected.")
-        except Exception as e: st.error(f"Error: {e}")
+        except: st.error("Processing error. Ensure file quality.")
         finally:
             if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
