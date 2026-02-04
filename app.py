@@ -46,6 +46,10 @@ st.markdown("""
         background-color: #161b22; padding: 5px 20px; z-index: 99;
     }
 
+    .info-card {
+        background: rgba(17, 24, 39, 0.5); border: 1px solid #1f2937;
+        padding: 20px; border-radius: 12px; margin-top: 20px;
+    }
     .footer-links { text-align: center; font-size: 12px; color: #4b5563; margin-top: 50px; }
     .footer-links a { color: #00d2ff; text-decoration: none; margin: 0 10px; }
     </style>
@@ -53,22 +57,22 @@ st.markdown("""
 
 # --- HEADER ---
 col_logo, col_serv = st.columns([4, 1])
-with col_logo: st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
+with col_logo: st.markdown("""<div class="brand-logo">VELO</div>""", unsafe_allow_html=True)
 with col_serv:
-    st.markdown('<div style="text-align: right; margin-top: 35px;">', unsafe_allow_html=True)
+    st.markdown("""<div style="text-align: right; margin-top: 35px;">""", unsafe_allow_html=True)
     with st.popover("🌐 OUR SERVICES", use_container_width=True):
         st.write("✅ PDF to Excel Pro")
         st.divider()
         st.write("• VELO Compressor (Soon)")
-    st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
+    st.markdown("""</div>""", unsafe_allow_html=True)
+st.markdown("""<div class="neon-divider"></div>""", unsafe_allow_html=True)
 
 # --- MAIN ENGINE ---
 col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 22px;'>Elite Precision Data Conversion</p>", unsafe_allow_html=True)
+    st.markdown("""<p style='color: #8b949e; font-size: 22px;'>Elite Precision Data Conversion</p>""", unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
@@ -100,21 +104,3 @@ with col_main:
                     final_dfs.append(df)
                 
                 output = BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    for i, df in enumerate(final_dfs):
-                        df.to_excel(writer, index=False, sheet_name=f'Table_{i+1}')
-                st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
-        except: st.error("Processing error.")
-        finally:
-            if os.path.exists("temp.pdf"): os.remove("temp.pdf")
-
-    # --- HOW IT WORKS & FAQ ---
-    st.markdown("---")
-    st.subheader("How It Works")
-    c1, c2, c3 = st.columns(3)
-    with c1: st.markdown("**1. Upload**\nDrop your high-complexity PDF file into the secure VELO zone.")
-    with c2: st.markdown("**2. Extract**\nOur Elite Engine identifies nested table structures with 99.9% accuracy.")
-    with c3: st.markdown("**3. Download**\nGet your perfectly formatted Excel file instantly.")
-
-with col_ad_side:
-    st.markdown('<div style="height:600px; background:#111827; border:1px solid #1
