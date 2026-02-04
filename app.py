@@ -8,26 +8,6 @@ import time
 # --- SEO & META CONFIG ---
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
-# --- GOOGLE ANALYTICS (STREAMLIT UYUMLU KESİN ÇÖZÜM) ---
-# Bu yöntem kodu doğrudan head kısmına enjekte ederek veri akışını başlatır.
-st.markdown(
-    f"""
-    <iframe src="javascript:void(0)" style="display:none" onload="
-        (function(){{
-            var s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH8EXJY2DZ';
-            document.head.appendChild(s);
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){{dataLayer.push(arguments);}}
-            gtag('js', new Date());
-            gtag('config', 'G-DH8EXJY2DZ');
-        }})()
-    "></iframe>
-    """,
-    unsafe_allow_html=True
-)
-
 # --- MASTER CSS (LOCKED) ---
 st.markdown("""
     <style>
@@ -57,24 +37,4 @@ st.markdown("""
 
     .info-card {
         background: rgba(17, 24, 39, 0.5); border: 1px solid #1f2937;
-        padding: 20px; border-radius: 12px; margin-top: 20px;
-    }
-    .footer-links { text-align: center; font-size: 12px; color: #4b5563; margin-top: 50px; }
-    .footer-links a { color: #00d2ff; text-decoration: none; margin: 0 10px; }
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- HEADER ---
-col_logo, col_serv = st.columns([4, 1])
-with col_logo: st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
-with col_serv:
-    st.markdown('<div style="text-align: right; margin-top: 35px;">', unsafe_allow_html=True)
-    with st.popover("🌐 OUR SERVICES", use_container_width=True):
-        st.write("✅ PDF to Excel Pro")
-        st.divider()
-        st.write("• VELO Compressor (Soon)")
-    st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
-
-# --- MAIN ENGINE ---
-col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
+        padding: 20px; border-
