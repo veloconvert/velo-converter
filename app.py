@@ -8,7 +8,7 @@ import time
 # --- PERFORMANCE CONFIG ---
 st.set_page_config(page_title="VELO", layout="wide")
 
-# --- VELO REFINED CSS ---
+# --- VELO NİHAİ CSS (OVERRIDE MODE) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
@@ -35,7 +35,7 @@ st.markdown("""
         margin-bottom: 60px;
     }
 
-    /* CENTERED MASSIVE UPLOADER & OVERRIDE 200MB TEXT */
+    /* CENTERED MASSIVE UPLOADER */
     [data-testid="stFileUploader"] {
         max-width: 1000px;
         margin: 60px auto !important;
@@ -45,10 +45,14 @@ st.markdown("""
         padding: 50px !important;
     }
 
-    /* MAGIC: Hiding 'Limit 200MB' and showing '500MB PRO' */
+    /* AGGRESSIVE TEXT OVERRIDE: Hiding the default limit text completely */
     [data-testid="stFileUploadDropzone"] div div small {
         display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
     }
+    
+    /* Adding the new high-end limit label */
     [data-testid="stFileUploadDropzone"]::after {
         content: "VELO PRO LIMIT: 500MB PER FILE";
         color: #00d2ff;
@@ -56,10 +60,10 @@ st.markdown("""
         font-size: 16px;
         display: block;
         margin-top: 15px;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
     }
 
-    /* AD SLOTS */
     .ad-slot {
         background: #111827;
         border: 1px solid #1f2937;
@@ -71,7 +75,7 @@ st.markdown("""
         font-size: 11px;
     }
 
-    /* DOWNLOAD BUTTON */
+    /* MOBILE & BUTTON FIXES */
     .stDownloadButton>button {
         width: 100% !important;
         max-width: 600px;
@@ -84,15 +88,20 @@ st.markdown("""
         border-radius: 60px !important;
         box-shadow: 0 15px 40px rgba(22, 101, 52, 0.4);
     }
+    
+    @media (max-width: 768px) {
+        .brand-logo { font-size: 35px; letter-spacing: 8px; }
+        .ad-side { display: none; }
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER ---
+# --- HEADER AREA ---
 col_logo, col_serv = st.columns([4, 1])
 with col_logo:
     st.markdown('<div class="brand-logo">VELO</div>', unsafe_allow_html=True)
 with col_serv:
-    st.markdown('<div style="text-align: right; margin-top: 30px;">', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: right; margin-top: 35px;">', unsafe_allow_html=True)
     with st.popover("🌐 OUR SERVICES", use_container_width=True):
         st.write("✅ PDF Table Extractor")
         st.divider()
@@ -102,21 +111,21 @@ with col_serv:
 
 st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
 
-# --- CONTENT LAYOUT ---
-col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1]) # Reklamı daha da sağa ittik
+# --- MAIN LAYOUT ---
+col_main, col_spacer, col_ad_side = st.columns([4, 0.5, 1])
 
 with col_main:
     st.markdown('<div class="ad-slot" style="height:90px; margin-bottom:50px;">ADVERTISEMENT AREA</div>', unsafe_allow_html=True)
     
     st.title("Professional PDF Table Extractor")
-    st.markdown("<p style='color: #8b949e; font-size: 22px; text-align: center;'>High-Speed Enterprise Conversion</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #8b949e; font-size: 22px;'>High-Speed Enterprise Conversion</p>", unsafe_allow_html=True)
     
-    # Uploader
+    # Uploader Section
     uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
         if uploaded_file.size > 500 * 1024 * 1024:
-            st.error("File exceeds 500MB PRO limit.")
+            st.error("File exceeds 500MB VELO PRO limit.")
         else:
             with open("temp.pdf", "wb") as f:
                 f.write(uploaded_file.getbuffer())
@@ -126,22 +135,20 @@ with col_main:
                     tables = camelot.read_pdf("temp.pdf", pages='all', flavor='lattice')
                 
                 if len(tables) > 0:
-                    st.success(f"Success: {len(tables)} tables identified.")
-                    all_dfs = []
+                    st.success(f"Extracted {len(tables)} tables.")
                     for table in tables:
                         st.dataframe(table.df, use_container_width=True)
-                        all_dfs.append(table.df)
                     
                     output = BytesIO()
                     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                        for i, df in enumerate(all_dfs):
-                            df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
+                        for i, table in enumerate(tables):
+                            table.df.to_excel(writer, index=False, header=False, sheet_name=f'Table_{i+1}')
                     
                     st.download_button(label="✅ READY TO DOWNLOAD", data=output.getvalue(), file_name="velo_export.xlsx")
                 else:
                     st.error("No tables detected.")
             except:
-                st.error("Engine processing error.")
+                st.error("Processing error.")
             finally:
                 if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
@@ -149,4 +156,4 @@ with col_ad_side:
     st.markdown('<div class="ad-slot" style="height:600px; writing-mode:vertical-rl; padding:20px; margin-top:100px;">SIDE ADVERTISEMENT</div>', unsafe_allow_html=True)
 
 # --- FOOTER ---
-st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px; border-top: 1px solid #1f2937; padding-top: 20px;'>VELO GLOBAL • 500MB PRO CAPACITY • 2026</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #1f2937; font-size: 11px; margin-top: 100px;'>VELO GLOBAL • 500MB PRO CAPACITY • 2026</div>", unsafe_allow_html=True)
