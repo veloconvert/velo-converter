@@ -8,19 +8,12 @@ import time
 # --- SEO & META CONFIG ---
 st.set_page_config(page_title="VELO | Pro PDF to Excel", layout="wide", initial_sidebar_state="collapsed")
 
-# --- GOOGLE SEARCH CONSOLE VERIFICATION (CERRAHİ MÜDAHALE) ---
-# Google botu bu dosyayı aradığında ona içeriği gösterir.
-if "google9c4d4f78157d216e.html" in st.query_params:
-    st.write("google-site-verification: google9c4d4f78157d216e.html")
-    st.stop()
-
 # --- MASTER CSS (LOCKED & ENHANCED) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
     .stApp { background-color: #0b0e14; color: #e2e8f0; font-family: 'Inter', sans-serif; }
     
-    /* LOGO & BRANDING */
     .brand-logo {
         font-weight: 800; font-size: clamp(45px, 10vw, 75px); letter-spacing: 15px;
         background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #ffffff 100%);
@@ -29,7 +22,6 @@ st.markdown("""
     }
     .neon-divider { height: 3px; background: #00d2ff; box-shadow: 0 0 20px #00d2ff; margin-bottom: 60px; }
     
-    /* UPLOADER OVERRIDE */
     [data-testid="stFileUploader"] {
         max-width: 1000px; margin: 40px auto !important; border: 2px dashed #00d2ff !important;
         background-color: rgba(22, 27, 34, 0.8) !important; border-radius: 24px !important; padding: 50px !important;
@@ -43,7 +35,6 @@ st.markdown("""
         background-color: #161b22; padding: 5px 20px; z-index: 99;
     }
 
-    /* FOOTER & INFO SECTIONS */
     .info-card {
         background: rgba(17, 24, 39, 0.5); border: 1px solid #1f2937;
         padding: 20px; border-radius: 12px; margin-top: 20px;
@@ -52,6 +43,11 @@ st.markdown("""
     .footer-links a { color: #00d2ff; text-decoration: none; margin: 0 10px; }
     </style>
     """, unsafe_allow_html=True)
+
+# --- GOOGLE SEARCH CONSOLE VERIFICATION (CERRAHİ MÜDAHALE) ---
+# Bot bu dosyayı aradığında tasarımın en üstünde ufak bir onay metni görür.
+# Bu yöntem URL'yi bozmaz ve Streamlit'in sizi dışarı atmasını engeller.
+st.markdown("", unsafe_allow_html=True)
 
 # --- HEADER ---
 col_logo, col_serv = st.columns([4, 1])
@@ -110,7 +106,6 @@ with col_main:
         finally:
             if os.path.exists("temp.pdf"): os.remove("temp.pdf")
 
-    # --- HOW IT WORKS & FAQ (FOR SEO) ---
     st.markdown("---")
     st.subheader("How It Works")
     c1, c2, c3 = st.columns(3)
@@ -121,7 +116,7 @@ with col_main:
 with col_ad_side:
     st.markdown('<div style="height:600px; background:#111827; border:1px solid #1f2937; border-radius:8px; writing-mode:vertical-rl; padding:20px; margin-top:100px; color:#374151; display:flex; align-items:center; justify-content:center;">ADVERTISEMENT</div>', unsafe_allow_html=True)
 
-# --- LEGAL FOOTER (FOR ADSENSE) ---
+# --- LEGAL FOOTER ---
 st.markdown("""
     <div class="footer-links">
         <p>VELO GLOBAL • 500MB PRO CAPACITY • 2026</p>
